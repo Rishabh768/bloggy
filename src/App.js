@@ -1,25 +1,40 @@
-import logo from './logo.svg';
 import './App.css';
+import { Header,Footer } from './components';
+import {Outlet} from 'react-router-dom';
+import authService from './appwrite/auth_service'
+import {login,logout} from './app/features/authSlice'
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const dispatch=useDispatch()
+  const [loading,setLoading]=useState(true)
+
+  useEffect(()=>{
+     authService.getCurrentUser()
+     .then((res)=>{
+      if(res){
+        dispatch(login(res));
+      } 
+      else {
+        dispatch(logout());
+      }
+      
+     }).catch((e)=>console.log(e))
+     .finally(()=>{
+       setLoading(false)
+     })
+  },[])
+      
+  return !loading ? (
+    <>
+    <Header/>
+      <div className='w-full bg-myWhite min-h-[580px]'>
+           <Outlet/>
+      </div>
+    <Footer/>
+    </>
+  ):null
 }
 
 export default App;
